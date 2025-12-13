@@ -1,0 +1,6 @@
+id,plant_batch_id,status,previous_status,changed_at,changed_by,reason,severity
+2fb16cc7-338a-4a19-8a2e-53d98dbffdff,63326672-5d8c-4be7-9cdf-ee0dc913c426,healthy,,2025-12-13 08:11:17.253239,897e80d3-cd9e-41e7-ae71-f681164cc427,Initial planting,
+02fd1972-5c22-4392-973e-08e3ae967d36,76ce49d4-f75f-468d-9237-c4c906e10366,healthy,,2025-12-13 08:11:17.253239,897e80d3-cd9e-41e7-ae71-f681164cc427,Initial planting,
+1c29feee-a9a2-4c2d-8b2e-d860772a783b,e86e2a38-7a4a-4315-b919-0883b94d5294,healthy,,2025-12-13 08:11:17.253239,897e80d3-cd9e-41e7-ae71-f681164cc427,Initial planting,
+4bbf6fa2-e59b-472e-bd43-ad38cf3ffda0,bf2e79e2-62c9-4dc1-9811-e583b38e2d96,healthy,,2025-12-13 08:11:17.253239,897e80d3-cd9e-41e7-ae71-f681164cc427,Initial planting,
+cfd674a2-51b4-4fd1-93ad-ea04c6813589,d2d7bac3-f80a-41e1-a543-bd5e359daa13,healthy,,2025-12-13 12:12:13.75,897e80d3-cd9e-41e7-ae71-f681164cc427,Initial planting,

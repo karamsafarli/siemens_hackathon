@@ -1,0 +1,5 @@
+id,name,scientific_name,irrigation_frequency_days,growth_duration_days,optimal_temperature_min,optimal_temperature_max,created_at
+8f664b31-a53c-4f19-98ba-b78a475cfb4e,Tomato,Solanum lycopersicum,3,90,15.00,30.00,2025-12-13 08:11:17.253239
+cdd3b459-8ef9-4232-8da2-0f2ae9fe90f5,Wheat,Triticum aestivum,7,120,10.00,25.00,2025-12-13 08:11:17.253239
+e299d968-ce5c-491d-bcf9-739d50636067,Cucumber,Cucumis sativus,2,60,18.00,28.00,2025-12-13 08:11:17.253239
+d7d40aaa-e842-4284-9d2c-4d140d914316,Carrot,Daucus carota,5,75,12.00,24.00,2025-12-13 08:11:17.253239

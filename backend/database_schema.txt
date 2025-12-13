@@ -1,0 +1,305 @@
+================================================================================
+SMART FARM DATABASE SCHEMA
+================================================================================
+Database: smart_farm
+Generated: $(date)
+================================================================================
+
+
+================================================================================
+TABLE: users
+================================================================================
+
+                                                                  Table "public.users"
+    Column     |            Type             | Collation | Nullable |           Default           | Storage  | Compression | Stats target | Description 
+---------------+-----------------------------+-----------+----------+-----------------------------+----------+-------------+--------------+-------------
+ id            | uuid                        |           | not null | gen_random_uuid()           | plain    |             |              | 
+ email         | character varying(255)      |           | not null |                             | extended |             |              | 
+ name          | character varying(255)      |           | not null |                             | extended |             |              | 
+ password_hash | character varying(255)      |           | not null |                             | extended |             |              | 
+ role          | character varying(50)       |           |          | 'farmer'::character varying | extended |             |              | 
+ created_at    | timestamp without time zone |           | not null | CURRENT_TIMESTAMP           | plain    |             |              | 
+ updated_at    | timestamp without time zone |           | not null | CURRENT_TIMESTAMP           | plain    |             |              | 
+Indexes:
+    "users_pkey" PRIMARY KEY, btree (id)
+    "users_email_key" UNIQUE CONSTRAINT, btree (email)
+Referenced by:
+    TABLE "fields" CONSTRAINT "fields_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    TABLE "import_jobs" CONSTRAINT "import_jobs_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    TABLE "irrigation_events" CONSTRAINT "irrigation_events_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    TABLE "notes" CONSTRAINT "notes_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    TABLE "status_history" CONSTRAINT "status_history_changed_by_fkey" FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
+Not-null constraints:
+    "users_id_not_null" NOT NULL "id"
+    "users_email_not_null" NOT NULL "email"
+    "users_name_not_null" NOT NULL "name"
+    "users_password_hash_not_null" NOT NULL "password_hash"
+    "users_created_at_not_null" NOT NULL "created_at"
+    "users_updated_at_not_null" NOT NULL "updated_at"
+Access method: heap
+
+
+
+
+================================================================================
+TABLE: fields
+================================================================================
+
+                                                            Table "public.fields"
+    Column     |            Type             | Collation | Nullable |      Default      | Storage  | Compression | Stats target | Description 
+---------------+-----------------------------+-----------+----------+-------------------+----------+-------------+--------------+-------------
+ id            | uuid                        |           | not null | gen_random_uuid() | plain    |             |              | 
+ user_id       | uuid                        |           | not null |                   | plain    |             |              | 
+ name          | character varying(255)      |           | not null |                   | extended |             |              | 
+ location      | character varying(255)      |           |          |                   | extended |             |              | 
+ size_hectares | numeric(10,2)               |           |          |                   | main     |             |              | 
+ created_at    | timestamp without time zone |           | not null | CURRENT_TIMESTAMP | plain    |             |              | 
+ updated_at    | timestamp without time zone |           | not null | CURRENT_TIMESTAMP | plain    |             |              | 
+ deleted_at    | timestamp without time zone |           |          |                   | plain    |             |              | 
+ archived_at   | timestamp without time zone |           |          |                   | plain    |             |              | 
+Indexes:
+    "fields_pkey" PRIMARY KEY, btree (id)
+    "fields_deleted_at_index" btree (deleted_at)
+    "fields_user_id_index" btree (user_id)
+Foreign-key constraints:
+    "fields_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+Referenced by:
+    TABLE "plant_batches" CONSTRAINT "plant_batches_field_id_fkey" FOREIGN KEY (field_id) REFERENCES fields(id) ON DELETE CASCADE
+Not-null constraints:
+    "fields_id_not_null" NOT NULL "id"
+    "fields_user_id_not_null" NOT NULL "user_id"
+    "fields_name_not_null" NOT NULL "name"
+    "fields_created_at_not_null" NOT NULL "created_at"
+    "fields_updated_at_not_null" NOT NULL "updated_at"
+Access method: heap
+
+
+
+
+================================================================================
+TABLE: plant_types
+================================================================================
+
+                                                                Table "public.plant_types"
+          Column           |            Type             | Collation | Nullable |      Default      | Storage  | Compression | Stats target | Description 
+---------------------------+-----------------------------+-----------+----------+-------------------+----------+-------------+--------------+-------------
+ id                        | uuid                        |           | not null | gen_random_uuid() | plain    |             |              | 
+ name                      | character varying(255)      |           | not null |                   | extended |             |              | 
+ scientific_name           | character varying(255)      |           |          |                   | extended |             |              | 
+ irrigation_frequency_days | integer                     |           | not null |                   | plain    |             |              | 
+ growth_duration_days      | integer                     |           |          |                   | plain    |             |              | 
+ optimal_temperature_min   | numeric(5,2)                |           |          |                   | main     |             |              | 
+ optimal_temperature_max   | numeric(5,2)                |           |          |                   | main     |             |              | 
+ created_at                | timestamp without time zone |           | not null | CURRENT_TIMESTAMP | plain    |             |              | 
+Indexes:
+    "plant_types_pkey" PRIMARY KEY, btree (id)
+Referenced by:
+    TABLE "plant_batches" CONSTRAINT "plant_batches_plant_type_id_fkey" FOREIGN KEY (plant_type_id) REFERENCES plant_types(id) ON DELETE RESTRICT
+Not-null constraints:
+    "plant_types_id_not_null" NOT NULL "id"
+    "plant_types_name_not_null" NOT NULL "name"
+    "plant_types_irrigation_frequency_days_not_null" NOT NULL "irrigation_frequency_days"
+    "plant_types_created_at_not_null" NOT NULL "created_at"
+Access method: heap
+
+
+
+
+================================================================================
+TABLE: plant_batches
+================================================================================
+
+                                                                  Table "public.plant_batches"
+        Column        |            Type             | Collation | Nullable |           Default            | Storage  | Compression | Stats target | Description 
+----------------------+-----------------------------+-----------+----------+------------------------------+----------+-------------+--------------+-------------
+ id                   | uuid                        |           | not null | gen_random_uuid()            | plain    |             |              | 
+ field_id             | uuid                        |           | not null |                              | plain    |             |              | 
+ plant_type_id        | uuid                        |           | not null |                              | plain    |             |              | 
+ batch_name           | character varying(255)      |           | not null |                              | extended |             |              | 
+ planting_date        | date                        |           | not null |                              | plain    |             |              | 
+ quantity             | integer                     |           |          |                              | plain    |             |              | 
+ current_status       | character varying(50)       |           |          | 'healthy'::character varying | extended |             |              | 
+ last_irrigation_date | date                        |           |          |                              | plain    |             |              | 
+ created_at           | timestamp without time zone |           | not null | CURRENT_TIMESTAMP            | plain    |             |              | 
+ updated_at           | timestamp without time zone |           | not null | CURRENT_TIMESTAMP            | plain    |             |              | 
+ deleted_at           | timestamp without time zone |           |          |                              | plain    |             |              | 
+Indexes:
+    "plant_batches_pkey" PRIMARY KEY, btree (id)
+    "plant_batches_current_status_index" btree (current_status)
+    "plant_batches_deleted_at_index" btree (deleted_at)
+    "plant_batches_field_id_index" btree (field_id)
+    "plant_batches_last_irrigation_date_index" btree (last_irrigation_date)
+    "plant_batches_plant_type_id_index" btree (plant_type_id)
+Foreign-key constraints:
+    "plant_batches_field_id_fkey" FOREIGN KEY (field_id) REFERENCES fields(id) ON DELETE CASCADE
+    "plant_batches_plant_type_id_fkey" FOREIGN KEY (plant_type_id) REFERENCES plant_types(id) ON DELETE RESTRICT
+Referenced by:
+    TABLE "irrigation_events" CONSTRAINT "irrigation_events_plant_batch_id_fkey" FOREIGN KEY (plant_batch_id) REFERENCES plant_batches(id) ON DELETE CASCADE
+    TABLE "notes" CONSTRAINT "notes_plant_batch_id_fkey" FOREIGN KEY (plant_batch_id) REFERENCES plant_batches(id) ON DELETE CASCADE
+    TABLE "status_history" CONSTRAINT "status_history_plant_batch_id_fkey" FOREIGN KEY (plant_batch_id) REFERENCES plant_batches(id) ON DELETE CASCADE
+Not-null constraints:
+    "plant_batches_id_not_null" NOT NULL "id"
+    "plant_batches_field_id_not_null" NOT NULL "field_id"
+    "plant_batches_plant_type_id_not_null" NOT NULL "plant_type_id"
+    "plant_batches_batch_name_not_null" NOT NULL "batch_name"
+    "plant_batches_planting_date_not_null" NOT NULL "planting_date"
+    "plant_batches_created_at_not_null" NOT NULL "created_at"
+    "plant_batches_updated_at_not_null" NOT NULL "updated_at"
+Access method: heap
+
+
+
+
+================================================================================
+TABLE: irrigation_events
+================================================================================
+
+                                                               Table "public.irrigation_events"
+       Column        |            Type             | Collation | Nullable |           Default            | Storage  | Compression | Stats target | Description 
+---------------------+-----------------------------+-----------+----------+------------------------------+----------+-------------+--------------+-------------
+ id                  | uuid                        |           | not null | gen_random_uuid()            | plain    |             |              | 
+ plant_batch_id      | uuid                        |           | not null |                              | plain    |             |              | 
+ scheduled_date      | date                        |           | not null |                              | plain    |             |              | 
+ executed_date       | date                        |           |          |                              | plain    |             |              | 
+ status              | character varying(20)       |           |          | 'planned'::character varying | extended |             |              | 
+ water_amount_liters | numeric(10,2)               |           |          |                              | main     |             |              | 
+ method              | character varying(50)       |           |          |                              | extended |             |              | 
+ notes               | text                        |           |          |                              | extended |             |              | 
+ created_by          | uuid                        |           | not null |                              | plain    |             |              | 
+ created_at          | timestamp without time zone |           | not null | CURRENT_TIMESTAMP            | plain    |             |              | 
+Indexes:
+    "irrigation_events_pkey" PRIMARY KEY, btree (id)
+    "irrigation_events_plant_batch_id_index" btree (plant_batch_id)
+    "irrigation_events_scheduled_date_index" btree (scheduled_date)
+    "irrigation_events_status_index" btree (status)
+Foreign-key constraints:
+    "irrigation_events_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    "irrigation_events_plant_batch_id_fkey" FOREIGN KEY (plant_batch_id) REFERENCES plant_batches(id) ON DELETE CASCADE
+Not-null constraints:
+    "irrigation_events_id_not_null" NOT NULL "id"
+    "irrigation_events_plant_batch_id_not_null" NOT NULL "plant_batch_id"
+    "irrigation_events_scheduled_date_not_null" NOT NULL "scheduled_date"
+    "irrigation_events_created_by_not_null" NOT NULL "created_by"
+    "irrigation_events_created_at_not_null" NOT NULL "created_at"
+Access method: heap
+
+
+
+
+================================================================================
+TABLE: notes
+================================================================================
+
+                                                               Table "public.notes"
+      Column       |            Type             | Collation | Nullable |      Default      | Storage  | Compression | Stats target | Description 
+-------------------+-----------------------------+-----------+----------+-------------------+----------+-------------+--------------+-------------
+ id                | uuid                        |           | not null | gen_random_uuid() | plain    |             |              | 
+ plant_batch_id    | uuid                        |           | not null |                   | plain    |             |              | 
+ note_type         | character varying(50)       |           | not null |                   | extended |             |              | 
+ content           | text                        |           | not null |                   | extended |             |              | 
+ linked_event_type | character varying(50)       |           |          |                   | extended |             |              | 
+ linked_event_id   | uuid                        |           |          |                   | plain    |             |              | 
+ created_by        | uuid                        |           | not null |                   | plain    |             |              | 
+ created_at        | timestamp without time zone |           | not null | CURRENT_TIMESTAMP | plain    |             |              | 
+ edited_at         | timestamp without time zone |           |          |                   | plain    |             |              | 
+ deleted_at        | timestamp without time zone |           |          |                   | plain    |             |              | 
+Indexes:
+    "notes_pkey" PRIMARY KEY, btree (id)
+    "notes_deleted_at_index" btree (deleted_at)
+    "notes_note_type_index" btree (note_type)
+    "notes_plant_batch_id_index" btree (plant_batch_id)
+Foreign-key constraints:
+    "notes_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    "notes_plant_batch_id_fkey" FOREIGN KEY (plant_batch_id) REFERENCES plant_batches(id) ON DELETE CASCADE
+Not-null constraints:
+    "notes_id_not_null" NOT NULL "id"
+    "notes_plant_batch_id_not_null" NOT NULL "plant_batch_id"
+    "notes_note_type_not_null" NOT NULL "note_type"
+    "notes_content_not_null" NOT NULL "content"
+    "notes_created_by_not_null" NOT NULL "created_by"
+    "notes_created_at_not_null" NOT NULL "created_at"
+Access method: heap
+
+
+
+
+================================================================================
+TABLE: status_history
+================================================================================
+
+                                                         Table "public.status_history"
+     Column      |            Type             | Collation | Nullable |      Default      | Storage  | Compression | Stats target | Description 
+-----------------+-----------------------------+-----------+----------+-------------------+----------+-------------+--------------+-------------
+ id              | uuid                        |           | not null | gen_random_uuid() | plain    |             |              | 
+ plant_batch_id  | uuid                        |           | not null |                   | plain    |             |              | 
+ status          | character varying(50)       |           | not null |                   | extended |             |              | 
+ previous_status | character varying(50)       |           |          |                   | extended |             |              | 
+ changed_at      | timestamp without time zone |           | not null | CURRENT_TIMESTAMP | plain    |             |              | 
+ changed_by      | uuid                        |           | not null |                   | plain    |             |              | 
+ reason          | text                        |           |          |                   | extended |             |              | 
+ severity        | character varying(20)       |           |          |                   | extended |             |              | 
+Indexes:
+    "status_history_pkey" PRIMARY KEY, btree (id)
+    "status_history_changed_at_index" btree (changed_at)
+    "status_history_plant_batch_id_index" btree (plant_batch_id)
+Foreign-key constraints:
+    "status_history_changed_by_fkey" FOREIGN KEY (changed_by) REFERENCES users(id) ON DELETE SET NULL
+    "status_history_plant_batch_id_fkey" FOREIGN KEY (plant_batch_id) REFERENCES plant_batches(id) ON DELETE CASCADE
+Not-null constraints:
+    "status_history_id_not_null" NOT NULL "id"
+    "status_history_plant_batch_id_not_null" NOT NULL "plant_batch_id"
+    "status_history_status_not_null" NOT NULL "status"
+    "status_history_changed_at_not_null" NOT NULL "changed_at"
+    "status_history_changed_by_not_null" NOT NULL "changed_by"
+Access method: heap
+
+
+
+
+================================================================================
+TABLE: import_jobs
+================================================================================
+
+                                                                  Table "public.import_jobs"
+       Column       |            Type             | Collation | Nullable |           Default            | Storage  | Compression | Stats target | Description 
+--------------------+-----------------------------+-----------+----------+------------------------------+----------+-------------+--------------+-------------
+ id                 | uuid                        |           | not null | gen_random_uuid()            | plain    |             |              | 
+ filename           | character varying(255)      |           |          |                              | extended |             |              | 
+ status             | character varying(50)       |           |          | 'pending'::character varying | extended |             |              | 
+ total_records      | integer                     |           |          |                              | plain    |             |              | 
+ successful_records | integer                     |           |          | 0                            | plain    |             |              | 
+ failed_records     | integer                     |           |          | 0                            | plain    |             |              | 
+ error_log          | jsonb                       |           |          |                              | extended |             |              | 
+ created_by         | uuid                        |           | not null |                              | plain    |             |              | 
+ created_at         | timestamp without time zone |           | not null | CURRENT_TIMESTAMP            | plain    |             |              | 
+ completed_at       | timestamp without time zone |           |          |                              | plain    |             |              | 
+Indexes:
+    "import_jobs_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "import_jobs_created_by_fkey" FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+Not-null constraints:
+    "import_jobs_id_not_null" NOT NULL "id"
+    "import_jobs_created_by_not_null" NOT NULL "created_by"
+    "import_jobs_created_at_not_null" NOT NULL "created_at"
+Access method: heap
+
+
+
+================================================================================
+DATABASE SUMMARY
+================================================================================
+
+                List of tables
+ Schema |       Name        | Type  |  Owner   
+--------+-------------------+-------+----------
+ public | fields            | table | postgres
+ public | import_jobs       | table | postgres
+ public | irrigation_events | table | postgres
+ public | notes             | table | postgres
+ public | pgmigrations      | table | postgres
+ public | plant_batches     | table | postgres
+ public | plant_types       | table | postgres
+ public | status_history    | table | postgres
+ public | users             | table | postgres
+(9 rows)
+

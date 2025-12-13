@@ -1,0 +1,2 @@
+id,email,name,password_hash,role,created_at,updated_at
+897e80d3-cd9e-41e7-ae71-f681164cc427,demo@smartfarm.com,Demo Farmer,$2b$10$Mmq1OGCFqCtphUDzUsaAiOB6OCN8wd8n3NHriQ2ZvFXEFkfnpm72C,farmer,2025-12-13 08:11:17.253239,2025-12-13 08:11:17.253239

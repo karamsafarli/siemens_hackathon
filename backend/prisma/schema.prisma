@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model fields {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id       String          @db.Uuid
+  name          String          @db.VarChar(255)
+  location      String?         @db.VarChar(255)
+  size_hectares Decimal?        @db.Decimal(10, 2)
+  created_at    DateTime        @default(now()) @db.Timestamp(6)
+  updated_at    DateTime        @default(now()) @db.Timestamp(6)
+  deleted_at    DateTime?       @db.Timestamp(6)
+  archived_at   DateTime?       @db.Timestamp(6)
+  users         users           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  plant_batches plant_batches[]
+
+  @@index([deleted_at], map: "fields_deleted_at_index")
+  @@index([user_id], map: "fields_user_id_index")
+}
+
+model import_jobs {
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  filename           String?   @db.VarChar(255)
+  status             String?   @default("pending") @db.VarChar(50)
+  total_records      Int?
+  successful_records Int?      @default(0)
+  failed_records     Int?      @default(0)
+  error_log          Json?
+  created_by         String    @db.Uuid
+  created_at         DateTime  @default(now()) @db.Timestamp(6)
+  completed_at       DateTime? @db.Timestamp(6)
+  users              users     @relation(fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+}
+
+model irrigation_events {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plant_batch_id      String        @db.Uuid
+  scheduled_date      DateTime      @db.Date
+  executed_date       DateTime?     @db.Date
+  status              String?       @default("planned") @db.VarChar(20)
+  water_amount_liters Decimal?      @db.Decimal(10, 2)
+  method              String?       @db.VarChar(50)
+  notes               String?
+  created_by          String        @db.Uuid
+  created_at          DateTime      @default(now()) @db.Timestamp(6)
+  users               users         @relation(fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  plant_batches       plant_batches @relation(fields: [plant_batch_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([plant_batch_id], map: "irrigation_events_plant_batch_id_index")
+  @@index([scheduled_date], map: "irrigation_events_scheduled_date_index")
+  @@index([status], map: "irrigation_events_status_index")
+}
+
+model notes {
+  id                String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plant_batch_id    String        @db.Uuid
+  note_type         String        @db.VarChar(50)
+  content           String
+  linked_event_type String?       @db.VarChar(50)
+  linked_event_id   String?       @db.Uuid
+  created_by        String        @db.Uuid
+  created_at        DateTime      @default(now()) @db.Timestamp(6)
+  edited_at         DateTime?     @db.Timestamp(6)
+  deleted_at        DateTime?     @db.Timestamp(6)
+  users             users         @relation(fields: [created_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  plant_batches     plant_batches @relation(fields: [plant_batch_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([deleted_at], map: "notes_deleted_at_index")
+  @@index([note_type], map: "notes_note_type_index")
+  @@index([plant_batch_id], map: "notes_plant_batch_id_index")
+}
+
+model pgmigrations {
+  id     Int      @id @default(autoincrement())
+  name   String   @db.VarChar(255)
+  run_on DateTime @db.Timestamp(6)
+}
+
+model plant_batches {
+  id                   String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  field_id             String              @db.Uuid
+  plant_type_id        String              @db.Uuid
+  batch_name           String              @db.VarChar(255)
+  planting_date        DateTime            @db.Date
+  quantity             Int?
+  current_status       String?             @default("healthy") @db.VarChar(50)
+  last_irrigation_date DateTime?           @db.Date
+  created_at           DateTime            @default(now()) @db.Timestamp(6)
+  updated_at           DateTime            @default(now()) @db.Timestamp(6)
+  deleted_at           DateTime?           @db.Timestamp(6)
+  irrigation_events    irrigation_events[]
+  notes                notes[]
+  fields               fields              @relation(fields: [field_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  plant_types          plant_types         @relation(fields: [plant_type_id], references: [id], onUpdate: NoAction)
+  status_history       status_history[]
+
+  @@index([current_status], map: "plant_batches_current_status_index")
+  @@index([deleted_at], map: "plant_batches_deleted_at_index")
+  @@index([field_id], map: "plant_batches_field_id_index")
+  @@index([last_irrigation_date], map: "plant_batches_last_irrigation_date_index")
+  @@index([plant_type_id], map: "plant_batches_plant_type_id_index")
+}
+
+model plant_types {
+  id                        String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                      String          @db.VarChar(255)
+  scientific_name           String?         @db.VarChar(255)
+  irrigation_frequency_days Int
+  growth_duration_days      Int?
+  optimal_temperature_min   Decimal?        @db.Decimal(5, 2)
+  optimal_temperature_max   Decimal?        @db.Decimal(5, 2)
+  created_at                DateTime        @default(now()) @db.Timestamp(6)
+  plant_batches             plant_batches[]
+}
+
+model status_history {
+  id              String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  plant_batch_id  String        @db.Uuid
+  status          String        @db.VarChar(50)
+  previous_status String?       @db.VarChar(50)
+  changed_at      DateTime      @default(now()) @db.Timestamp(6)
+  changed_by      String        @db.Uuid
+  reason          String?
+  severity        String?       @db.VarChar(20)
+  users           users         @relation(fields: [changed_by], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  plant_batches   plant_batches @relation(fields: [plant_batch_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([changed_at], map: "status_history_changed_at_index")
+  @@index([plant_batch_id], map: "status_history_plant_batch_id_index")
+}
+
+model users {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email             String              @unique @db.VarChar(255)
+  name              String              @db.VarChar(255)
+  password_hash     String              @db.VarChar(255)
+  role              String?             @default("farmer") @db.VarChar(50)
+  created_at        DateTime            @default(now()) @db.Timestamp(6)
+  updated_at        DateTime            @default(now()) @db.Timestamp(6)
+  fields            fields[]
+  import_jobs       import_jobs[]
+  irrigation_events irrigation_events[]
+  notes             notes[]
+  status_history    status_history[]
+}

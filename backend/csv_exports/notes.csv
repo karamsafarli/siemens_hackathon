@@ -1,0 +1,4 @@
+id,plant_batch_id,note_type,content,linked_event_type,linked_event_id,created_by,created_at,edited_at,deleted_at
+c65420ce-a1fd-4f77-a277-6ac498160a03,63326672-5d8c-4be7-9cdf-ee0dc913c426,observation,Nice,,,897e80d3-cd9e-41e7-ae71-f681164cc427,2025-12-13 08:11:17.253239,2025-12-13 12:09:47.043,
+ce7ea973-6d57-4ae3-b687-8ca26d58b9d2,e86e2a38-7a4a-4315-b919-0883b94d5294,irrigation,Testing notes,,,897e80d3-cd9e-41e7-ae71-f681164cc427,2025-12-13 12:10:15.942,,2025-12-13 12:10:18.841
+4f802307-0f2c-469a-934d-9a8a5ce2bbd1,76ce49d4-f75f-468d-9237-c4c906e10366,maintenance,testing,,,897e80d3-cd9e-41e7-ae71-f681164cc427,2025-12-13 12:10:56.197,,
