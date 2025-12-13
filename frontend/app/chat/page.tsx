@@ -16,14 +16,14 @@ interface Message {
 }
 
 const SUGGESTIONS = [
-    "How many plants do I have in total?",
-    "Show me plants that need watering",
-    "What's the health status of my crops?",
-    "Show me a chart of plants by field",
-    "Which plants are at risk or critical?",
-    "How many fields do I have?",
-    "Show me a bar chart of plant types",
-    "What notes have been added recently?",
+    "Mənim cəmi neçə bitkım var?",
+    "Suvarılmalı bitkiləri göstər",
+    "Məhsullarımın sağlamlıq vəziyyəti necədir?",
+    "Sahələr üzrə bitkilərin qrafikini göstər",
+    "Hansı bitkilər risk altındadır?",
+    "Neçə sahəm var?",
+    "Bitki növlərinin diaqramını göstər",
+    "Son əlavə edilən qeydlər hansılardır?",
 ];
 
 export default function ChatPage() {
@@ -135,13 +135,13 @@ export default function ChatPage() {
             const errorMessage: Message = {
                 id: (Date.now() + 1).toString(),
                 role: 'assistant',
-                content: `Sorry, I encountered an error: ${error.message}. Please make sure the OPENAI_API_KEY is configured in the backend.`,
+                content: `Üzr istəyirik, xəta baş verdi: ${error.message}. Zəhmət olmasa OPENAI_API_KEY-in backend-də konfiqurasiya edildiyinə əmin olun.`,
                 type: 'text',
                 timestamp: new Date(),
             };
 
             setMessages((prev) => [...prev, errorMessage]);
-            showToast('error', 'Failed to send message');
+            showToast('error', 'Mesaj göndərilmədi');
         } finally {
             setIsLoading(false);
             inputRef.current?.focus();
@@ -157,7 +157,7 @@ export default function ChatPage() {
 
     const clearChat = () => {
         setMessages([]);
-        showToast('success', 'Chat cleared');
+        showToast('success', 'Söhbət təmizləndi');
     };
 
     return (
@@ -172,10 +172,10 @@ export default function ChatPage() {
                             </div>
                             <div>
                                 <h1 className="text-xl font-bold text-white flex items-center gap-2">
-                                    Smart Farm AI
+                                    Ağıllı Ferma AI
                                     <Sparkles className="w-4 h-4 text-amber-400" />
                                 </h1>
-                                <p className="text-slate-400 text-sm">Ask anything about your farm</p>
+                                <p className="text-slate-400 text-sm">Ferma haqqında istənilən sual verin</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -184,14 +184,14 @@ export default function ChatPage() {
                                 className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors text-sm"
                             >
                                 <RefreshCw className="w-4 h-4" />
-                                Clear
+                                Təmizlə
                             </button>
                             <Link
                                 href="/"
                                 className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors"
                             >
                                 <ArrowLeft className="w-4 h-4" />
-                                Dashboard
+                                İdarə Paneli
                             </Link>
                         </div>
                     </div>
@@ -206,9 +206,9 @@ export default function ChatPage() {
                             <div className="w-20 h-20 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-violet-500/30">
                                 <Bot className="w-10 h-10 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-white mb-2">Welcome to Smart Farm AI!</h2>
+                            <h2 className="text-2xl font-bold text-white mb-2">Ağıllı Ferma AI-a Xoş Gəlmisiniz!</h2>
                             <p className="text-slate-400 mb-8 max-w-md mx-auto">
-                                I can help you with questions about your plants, fields, irrigation schedules, and farm statistics. I can even generate charts!
+                                Bitkiləriniz, sahələriniz, suvarma cədvəliniz və ferma statistikası haqqında suallarınıza cavab verə bilərəm. Hətta qrafiklər də yarada bilərəm!
                             </p>
 
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
@@ -256,7 +256,7 @@ export default function ChatPage() {
                                                 }`}
                                         >
                                             {message.type === 'chart' && message.html ? (
-                                                <div className="chat-chart">
+                                                <div className="chat-chart min-w-[350px] max-w-[500px]">
                                                     <iframe
                                                         srcDoc={`
                                                             <!DOCTYPE html>
@@ -264,14 +264,16 @@ export default function ChatPage() {
                                                             <head>
                                                                 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                                                                 <style>
-                                                                    body { margin: 0; padding: 16px; font-family: sans-serif; background: white; }
-                                                                    canvas { max-width: 100%; }
+                                                                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                                                                    body { padding: 12px; font-family: sans-serif; background: white; }
+                                                                    canvas { max-width: 100%; height: auto !important; }
+                                                                    #chartContainer { width: 100%; }
                                                                 </style>
                                                             </head>
-                                                            <body>${message.html}</body>
+                                                            <body><div id="chartContainer">${message.html}</div></body>
                                                             </html>
                                                         `}
-                                                        className="w-full min-w-[400px] h-[350px] rounded-xl border-0 bg-white"
+                                                        className="w-full h-[280px] rounded-xl border-0 bg-white"
                                                         sandbox="allow-scripts"
                                                         title="Chart visualization"
                                                     />
@@ -307,7 +309,7 @@ export default function ChatPage() {
                                     <div className="bg-slate-800 border border-slate-700 rounded-2xl px-5 py-4">
                                         <div className="flex items-center gap-2 text-slate-400">
                                             <Loader2 className="w-4 h-4 animate-spin" />
-                                            <span className="text-sm">Thinking...</span>
+                                            <span className="text-sm">Düşünürəm...</span>
                                         </div>
                                     </div>
                                 </div>
@@ -330,7 +332,7 @@ export default function ChatPage() {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyPress={handleKeyPress}
-                                placeholder="Ask about your farm..."
+                                placeholder="Ferma haqqında soruşun..."
                                 disabled={isLoading}
                                 className="w-full px-5 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:opacity-50 pr-12"
                             />
@@ -348,7 +350,7 @@ export default function ChatPage() {
                         </button>
                     </div>
                     <p className="text-xs text-slate-500 mt-2 text-center">
-                        Ask about plants, fields, irrigation, statistics, or request charts and visualizations
+                        Bitkilər, sahələr, suvarma, statistika haqqında soruşun və ya qrafik və vizuallaşdırma tələb edin
                     </p>
                 </div>
             </div>

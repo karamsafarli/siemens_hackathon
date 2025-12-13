@@ -54,12 +54,19 @@ IMPORTANT SQL RULES:
 - For dates, use proper PostgreSQL date functions
 - Return readable column names with AS aliases
 
+LANGUAGE RULES:
+- Detect the language of the user's question
+- If the user writes in Azerbaijani, set the "language" field to "az"
+- If the user writes in English, set the "language" field to "en"
+- Support other languages as needed
+
 Respond ONLY with a valid JSON object in this exact format:
 {
     "route": 0 | 1 | 2,
     "data": "SQL query here or rejection message",
     "type": "text" | "sql",
-    "reasoning": "Brief explanation of why this route was chosen"
+    "reasoning": "Brief explanation of why this route was chosen",
+    "language": "az" | "en" | "other"
 }`;
 
 // System prompt for generating human-friendly response
@@ -73,6 +80,8 @@ GUIDELINES:
 - If the result is empty, provide helpful context
 - Use farming terminology naturally
 - Add helpful insights when relevant
+
+LANGUAGE: Respond in {LANGUAGE}. If the language is "az", respond entirely in Azerbaijani. If "en", respond in English.
 
 SQL Query executed:
 {QUERY}
@@ -113,6 +122,7 @@ interface RouteResult {
     data: string;
     type: 'text' | 'sql';
     reasoning?: string;
+    language?: string;
 }
 
 interface ChartResult {
@@ -224,10 +234,14 @@ export const chatWithAI = async (req: Request, res: Response) => {
 
             // Route 1 - Generate text response
             if (routeResult.route === 1) {
+                const detectedLang = routeResult.language || 'en';
+                const langName = detectedLang === 'az' ? 'Azerbaijani' : detectedLang === 'en' ? 'English' : detectedLang;
+
                 const textPrompt = TEXT_RESPONSE_PROMPT
                     .replace('{QUERY}', routeResult.data)
                     .replace('{RESULTS}', JSON.stringify(sqlResult.data, null, 2))
-                    .replace('{USER_QUESTION}', message);
+                    .replace('{USER_QUESTION}', message)
+                    .replace('{LANGUAGE}', langName);
 
                 const textResponse = await openai.chat.completions.create({
                     model: 'gpt-4o-mini',
