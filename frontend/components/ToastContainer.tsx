@@ -54,7 +54,7 @@ export default function ToastContainer() {
                 return (
                     <div
                         key={toast.id}
-                        className="bg-white rounded-xl shadow-lg border border-slate-200 p-4 flex items-start gap-3 animate-in slide-in-from-right duration-300"
+                        className="bg-white rounded-xl shadow-lg border border-slate-200 p-4 flex items-center gap-3 animate-in slide-in-from-right duration-300"
                     >
                         <div className={`w-8 h-8 ${color} rounded-lg flex items-center justify-center flex-shrink-0`}>
                             <Icon className="w-5 h-5 text-white" />

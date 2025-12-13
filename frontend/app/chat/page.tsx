@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { Bot, Send, ArrowLeft, Sparkles, Loader2, User, Database, BarChart3, RefreshCw } from 'lucide-react';
+import { Bot, Send, ArrowLeft, Sparkles, Loader2, User, Database, RefreshCw, ImagePlus, X } from 'lucide-react';
 import { showToast } from '@/components/ToastContainer';
 
 interface Message {
@@ -12,6 +12,7 @@ interface Message {
     type: 'text' | 'chart';
     html?: string;
     sqlQuery?: string;
+    imageUrl?: string;
     timestamp: Date;
 }
 
@@ -30,8 +31,11 @@ export default function ChatPage() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Simple markdown parser for bold text and headers
     const renderMarkdown = (text: string) => {
@@ -157,41 +161,137 @@ export default function ChatPage() {
 
     const clearChat = () => {
         setMessages([]);
+        setSelectedImage(null);
+        setImageFile(null);
         showToast('success', 'Söhbət təmizləndi');
+    };
+
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                showToast('error', 'Yalnız şəkil faylları dəstəklənir');
+                return;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('error', 'Şəkil 10MB-dan böyük olmamalıdır');
+                return;
+            }
+            setImageFile(file);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSelectedImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const removeImage = () => {
+        setSelectedImage(null);
+        setImageFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const sendImageMessage = async () => {
+        if (!selectedImage || isLoading) return;
+
+        const text = input.trim() || 'Bu bitkini təhlil et və xəstəlik varsa müalicə tövsiyəsi ver.';
+
+        const userMessage: Message = {
+            id: Date.now().toString(),
+            role: 'user',
+            content: text,
+            type: 'text',
+            imageUrl: selectedImage,
+            timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, userMessage]);
+        setInput('');
+        setIsLoading(true);
+
+        const imageToSend = selectedImage;
+        removeImage();
+
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/chat/analyze-image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    message: text,
+                    imageBase64: imageToSend,
+                    language: 'az',
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to analyze image');
+            }
+
+            const assistantMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: 'assistant',
+                content: data.response?.content || 'Şəkil təhlil edilə bilmədi.',
+                type: 'text',
+                timestamp: new Date(),
+            };
+
+            setMessages((prev) => [...prev, assistantMessage]);
+        } catch (error: any) {
+            console.error('Image analysis error:', error);
+
+            const errorMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: 'assistant',
+                content: `Şəkil təhlilində xəta baş verdi: ${error.message}`,
+                type: 'text',
+                timestamp: new Date(),
+            };
+
+            setMessages((prev) => [...prev, errorMessage]);
+            showToast('error', 'Şəkil təhlil edilmədi');
+        } finally {
+            setIsLoading(false);
+            inputRef.current?.focus();
+        }
     };
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
             {/* Header */}
-            <div className="bg-slate-800/50 border-b border-slate-700 backdrop-blur-sm">
-                <div className="max-w-5xl mx-auto px-6 py-4">
+            <div className="bg-slate-800/50 border-b border-slate-700 backdrop-blur-sm sticky top-0 z-40">
+                <div className="max-w-5xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/25">
-                                <Bot className="w-6 h-6 text-white" />
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/25">
+                                <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <div>
-                                <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                                <h1 className="text-base sm:text-xl font-bold text-white flex items-center gap-1 sm:gap-2">
                                     Ağıllı Ferma AI
-                                    <Sparkles className="w-4 h-4 text-amber-400" />
+                                    <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-amber-400" />
                                 </h1>
-                                <p className="text-slate-400 text-sm">Ferma haqqında istənilən sual verin</p>
+                                <p className="text-slate-400 text-xs sm:text-sm hidden sm:block">Ferma haqqında istənilən sual verin</p>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                             <button
                                 onClick={clearChat}
-                                className="flex items-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors text-sm"
+                                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors text-xs sm:text-sm"
                             >
                                 <RefreshCw className="w-4 h-4" />
-                                Təmizlə
+                                <span className="hidden sm:inline">Təmizlə</span>
                             </button>
                             <Link
                                 href="/"
-                                className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors"
+                                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-colors text-xs sm:text-sm"
                             >
                                 <ArrowLeft className="w-4 h-4" />
-                                İdarə Paneli
+                                <span className="hidden sm:inline">İdarə Paneli</span>
                             </Link>
                         </div>
                     </div>
@@ -199,26 +299,26 @@ export default function ChatPage() {
             </div>
 
             {/* Chat Area */}
-            <div className="flex-1 overflow-y-auto py-6">
-                <div className="max-w-4xl mx-auto px-6">
+            <div className="flex-1 overflow-y-auto py-4 sm:py-6">
+                <div className="max-w-4xl mx-auto px-3 sm:px-6">
                     {messages.length === 0 ? (
-                        <div className="text-center py-16">
-                            <div className="w-20 h-20 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-2xl shadow-violet-500/30">
-                                <Bot className="w-10 h-10 text-white" />
+                        <div className="text-center py-8 sm:py-16">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 shadow-2xl shadow-violet-500/30">
+                                <Bot className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                             </div>
-                            <h2 className="text-2xl font-bold text-white mb-2">Ağıllı Ferma AI-a Xoş Gəlmisiniz!</h2>
-                            <p className="text-slate-400 mb-8 max-w-md mx-auto">
+                            <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Ağıllı Ferma AI-a Xoş Gəlmisiniz!</h2>
+                            <p className="text-slate-400 mb-6 sm:mb-8 max-w-md mx-auto text-sm sm:text-base px-2">
                                 Bitkiləriniz, sahələriniz, suvarma cədvəliniz və ferma statistikası haqqında suallarınıza cavab verə bilərəm. Hətta qrafiklər də yarada bilərəm!
                             </p>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3 max-w-3xl mx-auto">
                                 {SUGGESTIONS.slice(0, 8).map((suggestion, i) => (
                                     <button
                                         key={i}
                                         onClick={() => sendMessage(suggestion)}
-                                        className="p-3 bg-slate-800/50 border border-slate-700 rounded-xl text-left hover:bg-slate-700/50 hover:border-violet-500/50 transition-all group"
+                                        className="p-2 sm:p-3 bg-slate-800/50 border border-slate-700 rounded-lg sm:rounded-xl text-left hover:bg-slate-700/50 hover:border-violet-500/50 transition-all group active:scale-95"
                                     >
-                                        <p className="text-sm text-slate-300 group-hover:text-white line-clamp-2">
+                                        <p className="text-xs sm:text-sm text-slate-300 group-hover:text-white line-clamp-2">
                                             {suggestion}
                                         </p>
                                     </button>
@@ -226,37 +326,47 @@ export default function ChatPage() {
                             </div>
                         </div>
                     ) : (
-                        <div className="space-y-6">
+                        <div className="space-y-4 sm:space-y-6">
                             {messages.map((message) => (
                                 <div
                                     key={message.id}
-                                    className={`flex gap-4 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
+                                    className={`flex gap-2 sm:gap-4 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
                                 >
                                     <div
-                                        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${message.role === 'user'
+                                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl flex items-center justify-center flex-shrink-0 ${message.role === 'user'
                                             ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
                                             : 'bg-gradient-to-br from-violet-500 to-purple-600'
                                             }`}
                                     >
                                         {message.role === 'user' ? (
-                                            <User className="w-5 h-5 text-white" />
+                                            <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                         ) : (
-                                            <Bot className="w-5 h-5 text-white" />
+                                            <Bot className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                                         )}
                                     </div>
 
                                     <div
-                                        className={`flex-1 max-w-[80%] ${message.role === 'user' ? 'text-right' : ''
+                                        className={`flex-1 max-w-[85%] sm:max-w-[80%] ${message.role === 'user' ? 'text-right' : ''
                                             }`}
                                     >
                                         <div
-                                            className={`inline-block rounded-2xl px-5 py-4 ${message.role === 'user'
+                                            className={`inline-block rounded-xl sm:rounded-2xl px-3 py-2 sm:px-5 sm:py-4 ${message.role === 'user'
                                                 ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
                                                 : 'bg-slate-800 text-slate-100 border border-slate-700'
                                                 }`}
                                         >
+                                            {/* Show uploaded image if present */}
+                                            {message.imageUrl && (
+                                                <div className="mb-2 sm:mb-3">
+                                                    <img
+                                                        src={message.imageUrl}
+                                                        alt="Yüklənmiş şəkil"
+                                                        className="max-w-[200px] sm:max-w-[300px] max-h-[150px] sm:max-h-[200px] rounded-lg object-cover"
+                                                    />
+                                                </div>
+                                            )}
                                             {message.type === 'chart' && message.html ? (
-                                                <div className="chat-chart min-w-[350px] max-w-[500px]">
+                                                <div className="chat-chart min-w-[280px] sm:min-w-[350px] max-w-[350px] sm:max-w-[500px]">
                                                     <iframe
                                                         srcDoc={`
                                                             <!DOCTYPE html>
@@ -323,8 +433,47 @@ export default function ChatPage() {
 
             {/* Chat Input */}
             <div className="border-t border-slate-700 bg-slate-800/50 backdrop-blur-sm">
-                <div className="max-w-4xl mx-auto px-6 py-4">
-                    <div className="flex items-center gap-3">
+                <div className="max-w-4xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
+                    {/* Image Preview */}
+                    {selectedImage && (
+                        <div className="mb-2 sm:mb-3 flex items-start gap-2">
+                            <div className="relative inline-block">
+                                <img
+                                    src={selectedImage}
+                                    alt="Seçilmiş şəkil"
+                                    className="h-16 sm:h-24 w-auto rounded-lg object-cover border-2 border-violet-500"
+                                />
+                                <button
+                                    onClick={removeImage}
+                                    className="absolute -top-2 -right-2 w-5 h-5 sm:w-6 sm:h-6 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white shadow-lg"
+                                >
+                                    <X className="w-3 h-3 sm:w-4 sm:h-4" />
+                                </button>
+                            </div>
+                            <span className="text-xs sm:text-sm text-slate-400 mt-1 sm:mt-2 hidden sm:block">Şəkil yükləndi. Göndər düyməsini basın.</span>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        {/* Hidden file input */}
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageSelect}
+                            className="hidden"
+                        />
+
+                        {/* Image upload button */}
+                        <button
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isLoading}
+                            className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-700 hover:bg-slate-600 rounded-lg sm:rounded-xl flex items-center justify-center text-slate-300 hover:text-white transition-all disabled:opacity-50 flex-shrink-0"
+                            title="Bitki şəkli yükləyin"
+                        >
+                            <ImagePlus className="w-5 h-5" />
+                        </button>
+
                         <div className="flex-1 relative">
                             <input
                                 ref={inputRef}
@@ -332,15 +481,15 @@ export default function ChatPage() {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyPress={handleKeyPress}
-                                placeholder="Ferma haqqında soruşun..."
-                                disabled={isLoading}
-                                className="w-full px-5 py-4 bg-slate-900 border border-slate-700 rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:opacity-50 pr-12"
+                                placeholder={selectedImage ? "Göndər..." : "Ferma haqqında soruşun..."}
+                                disabled={isLoading || !!selectedImage}
+                                className="w-full px-3 sm:px-5 py-3 sm:py-4 bg-slate-900 border border-slate-700 rounded-lg sm:rounded-xl text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent disabled:opacity-50 text-sm sm:text-base"
                             />
                         </div>
                         <button
-                            onClick={() => sendMessage()}
-                            disabled={isLoading || !input.trim()}
-                            className="w-12 h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center text-white hover:from-violet-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-500/25"
+                            onClick={() => selectedImage ? sendImageMessage() : sendMessage()}
+                            disabled={isLoading || (!input.trim() && !selectedImage)}
+                            className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center text-white hover:from-violet-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-violet-500/25 flex-shrink-0"
                         >
                             {isLoading ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -349,8 +498,8 @@ export default function ChatPage() {
                             )}
                         </button>
                     </div>
-                    <p className="text-xs text-slate-500 mt-2 text-center">
-                        Bitkilər, sahələr, suvarma, statistika haqqında soruşun və ya qrafik və vizuallaşdırma tələb edin
+                    <p className="text-xs text-slate-500 mt-2 text-center hidden sm:block">
+                        Bitkilər, sahələr, suvarma haqqında soruşun, və ya bitki xəstəliyini skan etmək üçün şəkil yükləyin 📸
                     </p>
                 </div>
             </div>

@@ -8,6 +8,7 @@ import { FileText, ArrowLeft, Calendar, Edit3, MapPin, Sprout, Plus, Trash2 } fr
 import NoteForm from '@/components/forms/NoteForm';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { showToast } from '@/components/ToastContainer';
+import MobileNav from '@/components/MobileNav';
 
 export default function NotesPage() {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -74,47 +75,47 @@ export default function NotesPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 pb-20 md:pb-0">
             {/* Header */}
-            <div className="bg-white border-b border-slate-200 shadow-sm">
-                <div className="max-w-5xl mx-auto px-6 py-6">
+            <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-6">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl flex items-center justify-center">
-                                    <FileText className="w-6 h-6 text-white" />
-                                </div>
-                                Notes Journal
-                            </h1>
-                            <p className="text-slate-600 mt-1">Track observations and activities for your plants</p>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center">
+                                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-lg sm:text-3xl font-bold text-slate-900">Notes</h1>
+                                <p className="text-slate-600 text-xs sm:text-base hidden sm:block">Track observations and activities</p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                             <button
                                 onClick={() => {
                                     setEditingNote(null);
                                     setShowNoteForm(true);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all font-medium shadow-sm"
+                                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all font-medium shadow-sm text-xs sm:text-sm"
                             >
                                 <Plus className="w-4 h-4" />
-                                Add Note
+                                <span className="hidden sm:inline">Add Note</span>
                             </button>
-                            <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors">
+                            <Link href="/" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg sm:rounded-xl transition-colors text-xs sm:text-sm">
                                 <ArrowLeft className="w-4 h-4" />
-                                Dashboard
+                                <span className="hidden sm:inline">Dashboard</span>
                             </Link>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-6 py-8">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
                 {notes.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                         {notes.map((note) => {
                             const typeStyle = getNoteTypeStyle(note.note_type);
                             return (
-                                <div key={note.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all duration-200">
+                                <div key={note.id} className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-all duration-200">
                                     <div className="flex items-start justify-between mb-4">
                                         <div className="flex items-center gap-3 flex-wrap">
                                             <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold border ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}>
@@ -218,6 +219,9 @@ export default function NotesPage() {
                 confirmVariant="danger"
                 isLoading={isDeleting}
             />
+
+            {/* Mobile Bottom Navigation */}
+            <MobileNav />
         </div>
     );
 }

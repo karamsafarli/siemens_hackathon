@@ -17,3 +17,31 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Safe area support for iPhone X+ */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0);
+}
+
+/* Mobile touch optimizations */
+@media (max-width: 640px) {
+  /* Prevent text selection on mobile buttons */
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  
+  /* Smooth scrolling on iOS */
+  html {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Prevent zoom on input focus (iOS) */
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}

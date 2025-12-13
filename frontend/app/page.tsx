@@ -17,10 +17,13 @@ import {
   LogOut,
   Filter,
   Calendar,
-  X
+  X,
+  Home,
+  MessageSquare
 } from 'lucide-react';
 import Link from 'next/link';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import MobileNav from '@/components/MobileNav';
 import { useAuth } from '@/lib/auth-context';
 
 export default function DashboardPage() {
@@ -124,31 +127,31 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 pb-20 md:pb-0">
         {/* Header */}
-        <div className="bg-white border-b border-slate-200 shadow-sm">
-          <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                    <Sprout className="w-6 h-6 text-white" />
-                  </div>
-                  Smart Farm
-                </h1>
-                <p className="text-slate-600 mt-1">Monitor and manage your agricultural operations</p>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                  <Sprout className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-xl sm:text-3xl font-bold text-slate-900">Smart Farm</h1>
+                  <p className="text-slate-600 text-xs sm:text-base hidden sm:block">Monitor and manage your agricultural operations</p>
+                </div>
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 sm:gap-4">
+                <div className="hidden sm:flex items-center gap-2 text-sm">
                   <Activity className="w-4 h-4 text-emerald-500" />
                   <span className="text-slate-600">Welcome, {user?.name}</span>
                 </div>
                 <button
                   onClick={logout}
-                  className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors text-sm font-medium"
+                  className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors text-xs sm:text-sm font-medium"
                 >
                   <LogOut className="w-4 h-4" />
-                  Logout
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               </div>
             </div>
@@ -157,8 +160,8 @@ export default function DashboardPage() {
 
         {/* Filter Panel */}
         <div className="bg-white border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between mb-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+            <div className="flex items-center justify-between mb-3 sm:mb-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
                 className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors text-sm font-medium"
@@ -244,22 +247,22 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
             {statCards.map((card, index) => {
               const Icon = card.icon;
               return (
-                <div key={index} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all duration-200">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`w-12 h-12 bg-gradient-to-br ${card.bgGradient} rounded-xl flex items-center justify-center shadow-lg`}>
-                        <Icon className="w-6 h-6 text-white" />
+                <div key={index} className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-all duration-200">
+                  <div className="p-3 sm:p-6">
+                    <div className="flex items-center justify-between mb-2 sm:mb-4">
+                      <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${card.bgGradient} rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg`}>
+                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                       </div>
-                      <TrendingUp className="w-5 h-5 text-slate-400" />
+                      <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 hidden sm:block" />
                     </div>
-                    <div className="text-3xl font-bold text-slate-900 mb-1">{card.value}</div>
-                    <div className="text-sm font-medium text-slate-600">{card.title}</div>
+                    <div className="text-xl sm:text-3xl font-bold text-slate-900 mb-0.5 sm:mb-1">{card.value}</div>
+                    <div className="text-xs sm:text-sm font-medium text-slate-600">{card.title}</div>
                   </div>
                 </div>
               );
@@ -267,35 +270,35 @@ export default function DashboardPage() {
           </div>
 
           {/* Quick Navigation */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
             {navItems.map((item) => {
               const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="group bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md hover:border-emerald-300 transition-all duration-200"
+                  className="group bg-white rounded-xl shadow-sm border border-slate-200 p-3 sm:p-5 hover:shadow-md hover:border-emerald-300 transition-all duration-200 active:scale-95"
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <Icon className="w-6 h-6 text-slate-700 group-hover:text-emerald-600 transition-colors" />
-                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
+                  <div className="flex items-center justify-between mb-2 sm:mb-3">
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-700 group-hover:text-emerald-600 transition-colors" />
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
                   </div>
-                  <h3 className="font-semibold text-slate-900 mb-1">{item.label}</h3>
-                  <p className="text-sm text-slate-600">{item.description}</p>
+                  <h3 className="font-semibold text-slate-900 text-sm sm:text-base mb-0.5 sm:mb-1">{item.label}</h3>
+                  <p className="text-xs text-slate-600 hidden sm:block">{item.description}</p>
                 </Link>
               );
             })}
           </div>
 
           {/* Alerts Section */}
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-rose-500 to-pink-600 rounded-xl flex items-center justify-center">
-                <AlertCircle className="w-5 h-5 text-white" />
+          <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-rose-500 to-pink-600 rounded-lg sm:rounded-xl flex items-center justify-center">
+                <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Active Alerts</h2>
-                <p className="text-sm text-slate-600">Requires your attention</p>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900">Active Alerts</h2>
+                <p className="text-xs sm:text-sm text-slate-600">Requires your attention</p>
               </div>
             </div>
 
@@ -394,6 +397,9 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Mobile Bottom Navigation */}
+        <MobileNav />
       </div>
     </ProtectedRoute>
   );

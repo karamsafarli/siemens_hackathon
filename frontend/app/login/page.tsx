@@ -26,19 +26,19 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-center px-4 py-8">
             <div className="w-full max-w-md">
                 {/* Logo/Header */}
-                <div className="text-center mb-8">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                        <Sprout className="w-8 h-8 text-white" />
+                <div className="text-center mb-6 sm:mb-8">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+                        <Sprout className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
                     </div>
-                    <h1 className="text-3xl font-bold text-slate-900 mb-2">Smart Farm</h1>
-                    <p className="text-slate-600">Sign in to manage your farm</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-1 sm:mb-2">Smart Farm</h1>
+                    <p className="text-slate-600 text-sm sm:text-base">Sign in to manage your farm</p>
                 </div>
 
                 {/* Login Card */}
-                <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+                <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl border border-slate-200 p-6 sm:p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
                             <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3">

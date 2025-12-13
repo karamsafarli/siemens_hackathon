@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Droplets, ArrowLeft, AlertTriangle, CheckCircle2, Plus, History } from 'lucide-react';
 import { showToast } from '@/components/ToastContainer';
 import ScheduleIrrigationForm from '@/components/forms/ScheduleIrrigationForm';
+import MobileNav from '@/components/MobileNav';
 
 interface OverduePlant {
     id: string;
@@ -73,40 +74,40 @@ export default function IrrigationPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 pb-20 md:pb-0">
             {/* Header */}
-            <div className="bg-white border-b border-slate-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-6 py-6">
+            <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-6">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center">
-                                    <Droplets className="w-6 h-6 text-white" />
-                                </div>
-                                Irrigation Schedule
-                            </h1>
-                            <p className="text-slate-600 mt-1">Monitor irrigation status and water your plants on time</p>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg sm:rounded-xl flex items-center justify-center">
+                                <Droplets className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-lg sm:text-3xl font-bold text-slate-900">Irrigation</h1>
+                                <p className="text-slate-600 text-xs sm:text-base hidden sm:block">Water your plants on time</p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                             <button
                                 onClick={() => setShowScheduleForm(true)}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all font-medium shadow-sm"
+                                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all font-medium shadow-sm text-xs sm:text-sm"
                             >
                                 <Plus className="w-4 h-4" />
-                                Schedule Irrigation
+                                <span className="hidden sm:inline">Schedule</span>
                             </button>
-                            <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors">
+                            <Link href="/" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg sm:rounded-xl transition-colors text-xs sm:text-sm">
                                 <ArrowLeft className="w-4 h-4" />
-                                Dashboard
+                                <span className="hidden sm:inline">Dashboard</span>
                             </Link>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-6 py-8">
+            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
                 {/* Stats Bar */}
-                <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
                     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
@@ -250,6 +251,9 @@ export default function IrrigationPage() {
                 onClose={() => setShowScheduleForm(false)}
                 onSuccess={fetchOverdue}
             />
+
+            {/* Mobile Bottom Navigation */}
+            <MobileNav />
         </div>
     );
 }

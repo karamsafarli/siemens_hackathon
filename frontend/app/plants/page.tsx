@@ -10,6 +10,7 @@ import StatusUpdateForm from '@/components/forms/StatusUpdateForm';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { showToast } from '@/components/ToastContainer';
 import { useSearchParams } from 'next/navigation';
+import MobileNav from '@/components/MobileNav';
 
 export default function PlantsPage() {
     const [plants, setPlants] = useState<PlantBatch[]>([]);
@@ -81,48 +82,48 @@ export default function PlantsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 pb-20 md:pb-0">
             {/* Header */}
-            <div className="bg-white border-b border-slate-200 shadow-sm">
-                <div className="max-w-7xl mx-auto px-6 py-6">
+            <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-6">
                     <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                                    <Sprout className="w-6 h-6 text-white" />
-                                </div>
-                                Plant Batches
-                            </h1>
-                            <p className="text-slate-600 mt-1">Monitor all your plant batches and their health status</p>
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg sm:rounded-xl flex items-center justify-center">
+                                <Sprout className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                            </div>
+                            <div>
+                                <h1 className="text-lg sm:text-3xl font-bold text-slate-900">Plants</h1>
+                                <p className="text-slate-600 text-xs sm:text-base hidden sm:block">Monitor your plant batches</p>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-2 sm:gap-3">
                             <button
                                 onClick={() => {
                                     setEditingPlant(null);
                                     setShowPlantForm(true);
                                 }}
-                                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all font-medium shadow-sm"
+                                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg sm:rounded-xl hover:from-emerald-600 hover:to-teal-700 transition-all font-medium shadow-sm text-xs sm:text-sm"
                             >
                                 <Plus className="w-4 h-4" />
-                                Add Plant Batch
+                                <span className="hidden sm:inline">Add Plant</span>
                             </button>
-                            <Link href="/" className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors">
+                            <Link href="/" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg sm:rounded-xl transition-colors text-xs sm:text-sm">
                                 <ArrowLeft className="w-4 h-4" />
-                                Dashboard
+                                <span className="hidden sm:inline">Dashboard</span>
                             </Link>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                     {plants.map((plant) => {
                         const statusBadge = getStatusBadge(plant.current_status);
                         const StatusIcon = statusBadge.Icon;
 
                         return (
-                            <div key={plant.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-all duration-200">
+                            <div key={plant.id} className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-all duration-200">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex-1">
                                         <h3 className="text-xl font-bold text-slate-900 mb-1">{plant.batch_name}</h3>
@@ -194,17 +195,17 @@ export default function PlantsPage() {
 
                                 {plant.irrigation_status && (
                                     <div className={`p-4 rounded-xl border-l-4 ${plant.irrigation_status.status === 'critical'
-                                            ? 'bg-rose-50 border-rose-500'
-                                            : plant.irrigation_status.status === 'overdue'
-                                                ? 'bg-amber-50 border-amber-500'
-                                                : 'bg-emerald-50 border-emerald-500'
+                                        ? 'bg-rose-50 border-rose-500'
+                                        : plant.irrigation_status.status === 'overdue'
+                                            ? 'bg-amber-50 border-amber-500'
+                                            : 'bg-emerald-50 border-emerald-500'
                                         }`}>
                                         <div className="flex items-center gap-2">
                                             <Droplets className={`w-4 h-4 ${plant.irrigation_status.status === 'critical'
-                                                    ? 'text-rose-600'
-                                                    : plant.irrigation_status.status === 'overdue'
-                                                        ? 'text-amber-600'
-                                                        : 'text-emerald-600'
+                                                ? 'text-rose-600'
+                                                : plant.irrigation_status.status === 'overdue'
+                                                    ? 'text-amber-600'
+                                                    : 'text-emerald-600'
                                                 }`} />
                                             <span className="font-semibold text-slate-900 text-sm">
                                                 {plant.irrigation_status.status === 'on_time' ? '✓ Irrigation On Time' :
@@ -274,6 +275,9 @@ export default function PlantsPage() {
                 confirmVariant="danger"
                 isLoading={isDeleting}
             />
+
+            {/* Mobile Bottom Navigation */}
+            <MobileNav />
         </div>
     );
 }
