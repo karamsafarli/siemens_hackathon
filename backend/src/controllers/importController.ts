@@ -11,6 +11,15 @@ interface ImportRecord {
     status?: string;
 }
 
+// Helper function to parse date string as local time with current time
+function parseLocalDateTime(dateStr: string): Date {
+    const now = new Date();
+    // Parse the date parts
+    const [year, month, day] = dateStr.split('-').map(Number);
+    // Create date with current local time
+    return new Date(year, month - 1, day, now.getHours(), now.getMinutes(), now.getSeconds());
+}
+
 export const importData = async (req: Request, res: Response) => {
     try {
         const { user_id, records } = req.body;
@@ -99,7 +108,7 @@ export const importData = async (req: Request, res: Response) => {
                                 field_id: field.id,
                                 plant_type_id: plantType.id,
                                 batch_name: record.plant_name || `${record.plant_type} Batch`,
-                                planting_date: new Date(record.date),
+                                planting_date: parseLocalDateTime(record.date),
                             },
                         });
                     }
@@ -113,7 +122,7 @@ export const importData = async (req: Request, res: Response) => {
                             const existingIrrigation = await prisma.irrigation_events.findFirst({
                                 where: {
                                     plant_batch_id: plantBatch.id,
-                                    scheduled_date: new Date(record.date),
+                                    scheduled_date: parseLocalDateTime(record.date),
                                 },
                             });
 
@@ -122,8 +131,8 @@ export const importData = async (req: Request, res: Response) => {
                                     data: {
                                         plant_batch_id: plantBatch.id,
                                         created_by: user_id,
-                                        scheduled_date: new Date(record.date),
-                                        executed_date: new Date(record.date),
+                                        scheduled_date: parseLocalDateTime(record.date),
+                                        executed_date: parseLocalDateTime(record.date),
                                         status: 'completed',
                                         method: 'imported',
                                         notes: record.note,
@@ -133,7 +142,7 @@ export const importData = async (req: Request, res: Response) => {
                                 // Update last irrigation date
                                 await prisma.plant_batches.update({
                                     where: { id: plantBatch.id },
-                                    data: { last_irrigation_date: new Date(record.date) },
+                                    data: { last_irrigation_date: parseLocalDateTime(record.date) },
                                 });
                             } else {
                                 throw new Error(`Record ${i + 1}: Duplicate irrigation event for ${plantBatch.batch_name} on ${record.date}`);
@@ -150,7 +159,7 @@ export const importData = async (req: Request, res: Response) => {
                                     created_by: user_id,
                                     note_type: record.event_type === 'problem' ? 'disease' : 'observation',
                                     content: record.note || 'Imported observation',
-                                    created_at: new Date(record.date),
+                                    created_at: parseLocalDateTime(record.date),
                                 },
                             });
                         }
@@ -174,7 +183,7 @@ export const importData = async (req: Request, res: Response) => {
                                         status: record.status,
                                         previous_status: previousStatus,
                                         reason: record.note || 'Imported status change',
-                                        changed_at: new Date(record.date),
+                                        changed_at: parseLocalDateTime(record.date),
                                     },
                                 });
                             }

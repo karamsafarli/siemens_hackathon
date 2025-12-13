@@ -333,3 +333,98 @@ export const getChatSuggestions = async (req: Request, res: Response) => {
 
     res.json({ suggestions });
 };
+
+// Plant disease analysis prompt
+const PLANT_ANALYSIS_PROMPT = `You are an expert agricultural scientist and plant pathologist specializing in plant disease diagnosis and treatment.
+
+Analyze the provided plant image and:
+1. Identify the plant species if possible
+2. Detect any visible diseases, pests, nutrient deficiencies, or health issues
+3. Assess the severity (mild, moderate, severe)
+4. Provide specific treatment recommendations
+5. Suggest preventive measures
+
+RESPONSE FORMAT:
+Provide your analysis in a structured format with these sections:
+- **Bitki Növü** (Plant Type): Identified plant species
+- **Diaqnoz** (Diagnosis): What issues are detected
+- **Ciddilik Səviyyəsi** (Severity): mild/moderate/severe
+- **Müalicə Tövsiyələri** (Treatment Recommendations): Specific steps to treat the issue
+- **Profilaktik Tədbirlər** (Preventive Measures): How to prevent in the future
+
+If the image is not a plant or is unclear, politely explain that you need a clear image of a plant to analyze.
+
+LANGUAGE: Respond in {LANGUAGE}. If "az", respond entirely in Azerbaijani. If "en", respond in English.
+
+User's question about the image: "{USER_QUESTION}"`;
+
+// Analyze plant image for diseases
+export const analyzeImage = async (req: Request, res: Response) => {
+    try {
+        const { message, imageBase64, language = 'az' } = req.body;
+
+        if (!imageBase64) {
+            return res.status(400).json({ error: 'Image is required' });
+        }
+
+        if (!process.env.OPENAI_API_KEY) {
+            return res.status(500).json({ error: 'OpenAI API key not configured' });
+        }
+
+        const langName = language === 'az' ? 'Azerbaijani' : language === 'en' ? 'English' : language;
+        const userQuestion = message || 'Bu bitkini təhlil et və xəstəlik varsa müalicə tövsiyəsi ver.';
+
+        const analysisPrompt = PLANT_ANALYSIS_PROMPT
+            .replace('{LANGUAGE}', langName)
+            .replace('{USER_QUESTION}', userQuestion);
+
+        // Use GPT-4o for vision capabilities (gpt-4o-mini also works but GPT-4o is better for images)
+        const response = await openai.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+                {
+                    role: 'system',
+                    content: analysisPrompt
+                },
+                {
+                    role: 'user',
+                    content: [
+                        {
+                            type: 'text',
+                            text: userQuestion
+                        },
+                        {
+                            type: 'image_url',
+                            image_url: {
+                                url: imageBase64.startsWith('data:')
+                                    ? imageBase64
+                                    : `data:image/jpeg;base64,${imageBase64}`,
+                                detail: 'high'
+                            }
+                        }
+                    ]
+                }
+            ],
+            max_tokens: 1500,
+            temperature: 0.5,
+        });
+
+        const analysisResult = response.choices[0].message.content;
+
+        return res.json({
+            success: true,
+            response: {
+                type: 'text',
+                content: analysisResult,
+                isImageAnalysis: true,
+            }
+        });
+
+    } catch (error: any) {
+        console.error('Image analysis error:', error);
+        res.status(500).json({
+            error: 'Failed to analyze image',
+            details: error.message
+        });
+    }
+};

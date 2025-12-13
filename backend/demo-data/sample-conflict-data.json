@@ -1,0 +1,36 @@
+[
+    {
+        "date": "2025-12-10",
+        "field_name": "North Field",
+        "plant_name": "Spring Tomatoes",
+        "plant_type": "Tomato",
+        "event_type": "irrigation",
+        "note": "DUPLICATE: This irrigation already exists and will be rejected"
+    },
+    {
+        "date": "2025-12-12",
+        "field_name": "South Field",
+        "plant_name": "Winter Wheat",
+        "plant_type": "Wheat",
+        "event_type": "status_change",
+        "status": "at_risk",
+        "note": "CONFLICT: Status is already at_risk, will be skipped (no change)"
+    },
+    {
+        "date": "2025-12-13",
+        "field_name": "",
+        "plant_name": "Invalid Plant",
+        "plant_type": "Unknown",
+        "event_type": "observation",
+        "note": "INVALID: Missing field_name will cause error"
+    },
+    {
+        "date": "2025-12-13",
+        "field_name": "North Field",
+        "plant_name": "Spring Tomatoes",
+        "plant_type": "Tomato",
+        "event_type": "status_change",
+        "status": "healthy",
+        "note": "VALID: Status change from at_risk back to healthy"
+    }
+]

@@ -1,0 +1,67 @@
+[
+    {
+        "date": "2025-12-10",
+        "field_name": "North Field",
+        "plant_name": "Spring Tomatoes",
+        "plant_type": "Tomato",
+        "event_type": "irrigation",
+        "note": "Automated morning watering completed - 15 liters per plant"
+    },
+    {
+        "date": "2025-12-10",
+        "field_name": "North Field",
+        "plant_name": "Spring Tomatoes",
+        "plant_type": "Tomato",
+        "event_type": "observation",
+        "note": "Plants showing healthy growth, new flowers appearing"
+    },
+    {
+        "date": "2025-12-10",
+        "field_name": "South Field",
+        "plant_name": "Winter Wheat",
+        "plant_type": "Wheat",
+        "event_type": "observation",
+        "note": "Soil moisture at 58%, within optimal range"
+    },
+    {
+        "date": "2025-12-11",
+        "field_name": "East Greenhouse",
+        "plant_name": "Cucumber Batch A",
+        "plant_type": "Cucumber",
+        "event_type": "irrigation",
+        "note": "Drip irrigation system activated - 8 liters"
+    },
+    {
+        "date": "2025-12-11",
+        "field_name": "South Field",
+        "plant_name": "Winter Wheat",
+        "plant_type": "Wheat",
+        "event_type": "problem",
+        "note": "Yellow spots detected on some leaves - possible nutrient deficiency"
+    },
+    {
+        "date": "2025-12-11",
+        "field_name": "South Field",
+        "plant_name": "Winter Wheat",
+        "plant_type": "Wheat",
+        "event_type": "status_change",
+        "status": "at_risk",
+        "note": "Moving to at-risk status due to observed symptoms"
+    },
+    {
+        "date": "2025-12-12",
+        "field_name": "North Field",
+        "plant_name": "Spring Tomatoes",
+        "plant_type": "Tomato",
+        "event_type": "irrigation",
+        "note": "Evening watering session - 12 liters"
+    },
+    {
+        "date": "2025-12-12",
+        "field_name": "West Field",
+        "plant_name": "Carrot Patch",
+        "plant_type": "Carrot",
+        "event_type": "observation",
+        "note": "Germination rate at 85%, excellent soil conditions"
+    }
+]

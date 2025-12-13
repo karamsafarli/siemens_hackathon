@@ -1,0 +1,42 @@
+[
+    {
+        "date": "2025-12-14",
+        "field_name": "North Field",
+        "plant_name": "Spring Tomatoes",
+        "plant_type": "Tomato",
+        "event_type": "observation",
+        "note": "IoT Sensor Reading - Soil Moisture: 62%, Temp: 23°C, Humidity: 71%"
+    },
+    {
+        "date": "2025-12-14",
+        "field_name": "South Field",
+        "plant_name": "Winter Wheat",
+        "plant_type": "Wheat",
+        "event_type": "observation",
+        "note": "IoT Sensor Reading - Soil Moisture: 45%, Temp: 18°C, Humidity: 55%"
+    },
+    {
+        "date": "2025-12-14",
+        "field_name": "East Greenhouse",
+        "plant_name": "Cucumber Batch A",
+        "plant_type": "Cucumber",
+        "event_type": "observation",
+        "note": "IoT Sensor Reading - Soil Moisture: 78%, Temp: 28°C, Humidity: 85%"
+    },
+    {
+        "date": "2025-12-14",
+        "field_name": "South Field",
+        "plant_name": "Winter Wheat",
+        "plant_type": "Wheat",
+        "event_type": "problem",
+        "note": "ALERT: Soil moisture below threshold (45% < 50%). Irrigation recommended."
+    },
+    {
+        "date": "2025-12-14",
+        "field_name": "East Greenhouse",
+        "plant_name": "Cucumber Batch A",
+        "plant_type": "Cucumber",
+        "event_type": "irrigation",
+        "note": "Auto-triggered irrigation based on sensor data - 10 liters"
+    }
+]
