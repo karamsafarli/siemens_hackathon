@@ -10,7 +10,8 @@ import irrigationRouter from './routes/irrigation';
 import notesRouter from './routes/notes';
 import dashboardRouter from './routes/dashboard';
 import authRouter from './routes/auth';
-import importRoutes from './routes/import'; // New import
+import importRoutes from './routes/import';
+import chatRouter from './routes/chat';
 
 dotenv.config();
 
@@ -48,6 +49,7 @@ app.use('/api/plant-batches', plantBatchesRouter);
 app.use('/api/irrigation', irrigationRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/chat', chatRouter);
 
 // API documentation endpoint
 app.get('/api', (req, res) => {

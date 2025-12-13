@@ -119,6 +119,7 @@ export default function DashboardPage() {
     { href: '/plants', label: 'Plants', icon: Sprout, description: 'View plant batches' },
     { href: '/irrigation', label: 'Irrigation', icon: Droplets, description: 'Water schedule' },
     { href: '/notes', label: 'Notes', icon: FileText, description: 'Activity journal' },
+    { href: '/chat', label: 'AI Chat', icon: Droplets, description: 'Ask the AI assistant' },
   ];
 
   return (
