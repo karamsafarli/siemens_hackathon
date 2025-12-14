@@ -3,12 +3,11 @@
 import { useEffect, useState } from 'react';
 import { notesApi } from '@/lib/api';
 import type { Note } from '@/lib/types';
-import Link from 'next/link';
-import { FileText, ArrowLeft, Calendar, Edit3, MapPin, Sprout, Plus, Trash2 } from 'lucide-react';
+import { FileText, Calendar, Edit3, MapPin, Sprout, Plus, Trash2, Filter, X } from 'lucide-react';
 import NoteForm from '@/components/forms/NoteForm';
 import ConfirmDialog from '@/components/ui/ConfirmDialog';
 import { showToast } from '@/components/ToastContainer';
-import MobileNav from '@/components/MobileNav';
+import DashboardLayout from '@/components/DashboardLayout';
 
 export default function NotesPage() {
     const [notes, setNotes] = useState<Note[]>([]);
@@ -17,6 +16,7 @@ export default function NotesPage() {
     const [editingNote, setEditingNote] = useState<Note | null>(null);
     const [deletingNote, setDeletingNote] = useState<Note | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [typeFilter, setTypeFilter] = useState<string>('all');
 
     const fetchNotes = async () => {
         try {
@@ -49,153 +49,214 @@ export default function NotesPage() {
         }
     };
 
-    const getNoteTypeStyle = (type: string) => {
-        const styles: Record<string, { bg: string; text: string; border: string }> = {
-            irrigation: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-            disease: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200' },
-            fertilizer: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-            observation: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200' },
-            harvest: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-            weather: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
-            maintenance: { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200' },
-            general: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' },
-        };
-        return styles[type] || styles.general;
+    const noteTypeStyles: Record<string, { bg: string; text: string; border: string; gradient: string; icon: string }> = {
+        irrigation: { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', gradient: 'from-blue-500 to-cyan-500', icon: '💧' },
+        disease: { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-200', gradient: 'from-rose-500 to-pink-500', icon: '🦠' },
+        fertilizer: { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200', gradient: 'from-emerald-500 to-teal-500', icon: '🌱' },
+        observation: { bg: 'bg-violet-50', text: 'text-violet-700', border: 'border-violet-200', gradient: 'from-violet-500 to-purple-500', icon: '👁️' },
+        harvest: { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200', gradient: 'from-amber-500 to-orange-500', icon: '🌾' },
+        weather: { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-200', gradient: 'from-sky-500 to-blue-500', icon: '🌤️' },
+        maintenance: { bg: 'bg-cyan-50', text: 'text-cyan-700', border: 'border-cyan-200', gradient: 'from-cyan-500 to-teal-500', icon: '🔧' },
+        general: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200', gradient: 'from-slate-500 to-slate-600', icon: '📝' },
     };
+
+    const getNoteTypeStyle = (type: string) => {
+        return noteTypeStyles[type] || noteTypeStyles.general;
+    };
+
+    const filteredNotes = typeFilter === 'all'
+        ? notes
+        : notes.filter(n => n.note_type === typeFilter);
+
+    const typeCounts = notes.reduce((acc, note) => {
+        acc[note.note_type] = (acc[note.note_type] || 0) + 1;
+        return acc;
+    }, {} as Record<string, number>);
+
+    const headerActions = (
+        <button
+            onClick={() => {
+                setEditingNote(null);
+                setShowNoteForm(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all font-medium shadow-lg shadow-violet-500/20 btn-press"
+        >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Add Note</span>
+        </button>
+    );
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-slate-50">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 border-4 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-lg font-medium text-slate-700">Loading notes...</span>
+            <DashboardLayout title="Notes" subtitle="Track observations and activities" headerActions={headerActions}>
+                <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-white rounded-2xl border border-slate-200 p-6 animate-pulse">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="h-6 w-24 bg-slate-200 rounded-full"></div>
+                                <div className="h-4 w-32 bg-slate-100 rounded"></div>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="h-4 bg-slate-100 rounded w-full"></div>
+                                <div className="h-4 bg-slate-100 rounded w-3/4"></div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            </div>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 pb-20 md:pb-0">
-            {/* Header */}
-            <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-                <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg sm:rounded-xl flex items-center justify-center">
-                                <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-lg sm:text-3xl font-bold text-slate-900">Notes</h1>
-                                <p className="text-slate-600 text-xs sm:text-base hidden sm:block">Track observations and activities</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-2 sm:gap-3">
+        <DashboardLayout title="Notes" subtitle="Track observations and activities" headerActions={headerActions}>
+            {/* Filter Chips */}
+            {notes.length > 0 && (
+                <div className="flex flex-wrap items-center gap-2 mb-6 animate-fadeIn">
+                    <div className="flex items-center gap-2 text-sm text-slate-500 mr-2">
+                        <Filter className="w-4 h-4" />
+                        <span>Filter:</span>
+                    </div>
+                    <button
+                        onClick={() => setTypeFilter('all')}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${typeFilter === 'all'
+                                ? 'bg-slate-900 text-white shadow-lg'
+                                : 'bg-white border border-slate-200 text-slate-600 hover:border-slate-300'
+                            }`}
+                    >
+                        All ({notes.length})
+                    </button>
+                    {Object.entries(typeCounts).map(([type, count]) => {
+                        const style = getNoteTypeStyle(type);
+                        return (
                             <button
-                                onClick={() => {
-                                    setEditingNote(null);
-                                    setShowNoteForm(true);
-                                }}
-                                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-lg sm:rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all font-medium shadow-sm text-xs sm:text-sm"
+                                key={type}
+                                onClick={() => setTypeFilter(type)}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${typeFilter === type
+                                        ? `bg-gradient-to-r ${style.gradient} text-white shadow-lg`
+                                        : `${style.bg} ${style.text} hover:opacity-80`
+                                    }`}
                             >
-                                <Plus className="w-4 h-4" />
-                                <span className="hidden sm:inline">Add Note</span>
+                                <span>{noteTypeStyles[type]?.icon}</span>
+                                <span className="capitalize">{type}</span>
+                                <span className={`px-1.5 py-0.5 rounded-full text-xs ${typeFilter === type ? 'bg-white/20' : 'bg-white/60'
+                                    }`}>
+                                    {count}
+                                </span>
                             </button>
-                            <Link href="/" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg sm:rounded-xl transition-colors text-xs sm:text-sm">
-                                <ArrowLeft className="w-4 h-4" />
-                                <span className="hidden sm:inline">Dashboard</span>
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-                {notes.length > 0 ? (
-                    <div className="space-y-3 sm:space-y-4">
-                        {notes.map((note) => {
-                            const typeStyle = getNoteTypeStyle(note.note_type);
-                            return (
-                                <div key={note.id} className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-6 hover:shadow-md transition-all duration-200">
-                                    <div className="flex items-start justify-between mb-4">
-                                        <div className="flex items-center gap-3 flex-wrap">
-                                            <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold border ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}>
-                                                {note.note_type.toUpperCase()}
-                                            </span>
-                                            <div className="flex items-center gap-2 text-sm text-slate-600">
-                                                <Calendar className="w-4 h-4" />
-                                                <span>
-                                                    {new Date(note.created_at).toLocaleDateString()} at{' '}
-                                                    {new Date(note.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
-                                            </div>
-                                            {note.edited_at && (
-                                                <div className="flex items-center gap-1 text-xs text-slate-500">
-                                                    <Edit3 className="w-3 h-3" />
-                                                    <span>Edited</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex items-center gap-1">
-                                            <button
-                                                onClick={() => {
-                                                    setEditingNote(note);
-                                                    setShowNoteForm(true);
-                                                }}
-                                                className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
-                                                title="Edit note"
-                                            >
-                                                <Edit3 className="w-4 h-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => setDeletingNote(note)}
-                                                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                                title="Delete note"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <p className="text-slate-900 leading-relaxed mb-4 whitespace-pre-wrap">{note.content}</p>
-
-                                    {note.plant_batches && (
-                                        <div className="flex items-center gap-4 pt-4 border-t border-slate-100 text-sm">
-                                            <div className="flex items-center gap-2 text-slate-600">
-                                                <Sprout className="w-4 h-4" />
-                                                <span className="font-medium">Plant:</span>
-                                                <span className="text-slate-900 font-semibold">{note.plant_batches.batch_name}</span>
-                                            </div>
-                                            {note.plant_batches.fields && (
-                                                <div className="flex items-center gap-2 text-slate-600">
-                                                    <MapPin className="w-4 h-4" />
-                                                    <span className="font-medium">Field:</span>
-                                                    <span className="text-slate-900 font-semibold">{note.plant_batches.fields.name}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                ) : (
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-16 text-center">
-                        <div className="w-20 h-20 bg-violet-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <FileText className="w-10 h-10 text-violet-600" />
-                        </div>
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2">No Notes Yet</h2>
-                        <p className="text-slate-600 mb-1">Start adding notes to track your farm activities</p>
-                        <p className="text-sm text-slate-500 mb-6">Document observations, treatments, and important events</p>
+                        );
+                    })}
+                    {typeFilter !== 'all' && (
                         <button
-                            onClick={() => setShowNoteForm(true)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all font-medium"
+                            onClick={() => setTypeFilter('all')}
+                            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
                         >
-                            <Plus className="w-4 h-4" />
-                            Add Your First Note
+                            <X className="w-4 h-4" />
                         </button>
+                    )}
+                </div>
+            )}
+
+            {filteredNotes.length > 0 ? (
+                <div className="space-y-4">
+                    {filteredNotes.map((note, index) => {
+                        const typeStyle = getNoteTypeStyle(note.note_type);
+                        return (
+                            <div
+                                key={note.id}
+                                className="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 lg:p-6 card-hover animate-fadeIn group"
+                                style={{ animationDelay: `${index * 0.05}s` }}
+                            >
+                                <div className="flex items-start justify-between mb-4">
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        <span className={`px-3 py-1.5 rounded-xl text-xs font-semibold border flex items-center gap-1.5 ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}>
+                                            <span>{noteTypeStyles[note.note_type]?.icon}</span>
+                                            {note.note_type.toUpperCase()}
+                                        </span>
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            <Calendar className="w-4 h-4" />
+                                            <span>
+                                                {new Date(note.created_at).toLocaleDateString()} at{' '}
+                                                {new Date(note.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        </div>
+                                        {note.edited_at && (
+                                            <div className="flex items-center gap-1 text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">
+                                                <Edit3 className="w-3 h-3" />
+                                                <span>Edited</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => {
+                                                setEditingNote(note);
+                                                setShowNoteForm(true);
+                                            }}
+                                            className="p-2 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded-lg transition-colors"
+                                            title="Edit note"
+                                        >
+                                            <Edit3 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => setDeletingNote(note)}
+                                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+                                            title="Delete note"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <p className="text-slate-700 leading-relaxed mb-4 whitespace-pre-wrap">{note.content}</p>
+
+                                {note.plant_batches && (
+                                    <div className="flex items-center gap-4 pt-4 border-t border-slate-100 text-sm">
+                                        <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 rounded-lg">
+                                            <Sprout className="w-4 h-4 text-emerald-600" />
+                                            <span className="text-slate-600">Plant:</span>
+                                            <span className="text-emerald-700 font-semibold">{note.plant_batches.batch_name}</span>
+                                        </div>
+                                        {note.plant_batches.fields && (
+                                            <div className="flex items-center gap-2 px-3 py-1.5 bg-teal-50 rounded-lg">
+                                                <MapPin className="w-4 h-4 text-teal-600" />
+                                                <span className="text-slate-600">Field:</span>
+                                                <span className="text-teal-700 font-semibold">{note.plant_batches.fields.name}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            ) : (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 lg:p-16 text-center animate-fadeIn">
+                    <div className="w-24 h-24 bg-gradient-to-br from-violet-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-violet-500/10">
+                        <FileText className="w-12 h-12 text-violet-600" />
                     </div>
-                )}
-            </div>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2">
+                        {typeFilter !== 'all' ? 'No notes of this type' : 'No Notes Yet'}
+                    </h2>
+                    <p className="text-slate-500 mb-1">
+                        {typeFilter !== 'all'
+                            ? 'Try selecting a different filter to see more notes.'
+                            : 'Start adding notes to track your farm activities'
+                        }
+                    </p>
+                    {typeFilter === 'all' && (
+                        <>
+                            <p className="text-sm text-slate-400 mb-8">Document observations, treatments, and important events</p>
+                            <button
+                                onClick={() => setShowNoteForm(true)}
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-xl hover:from-violet-600 hover:to-purple-700 transition-all font-medium shadow-lg shadow-violet-500/20"
+                            >
+                                <Plus className="w-5 h-5" />
+                                Add Your First Note
+                            </button>
+                        </>
+                    )}
+                </div>
+            )}
 
             {/* Note Form Modal */}
             <NoteForm
@@ -219,9 +280,6 @@ export default function NotesPage() {
                 confirmVariant="danger"
                 isLoading={isDeleting}
             />
-
-            {/* Mobile Bottom Navigation */}
-            <MobileNav />
-        </div>
+        </DashboardLayout>
     );
 }

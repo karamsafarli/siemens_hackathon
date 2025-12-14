@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { irrigationApi, DEMO_USER_ID } from '@/lib/api';
-import Link from 'next/link';
-import { Droplets, ArrowLeft, AlertTriangle, CheckCircle2, Plus, History } from 'lucide-react';
+import { Droplets, AlertTriangle, CheckCircle2, Plus, Clock, Calendar as CalendarIcon } from 'lucide-react';
 import { showToast } from '@/components/ToastContainer';
 import ScheduleIrrigationForm from '@/components/forms/ScheduleIrrigationForm';
-import MobileNav from '@/components/MobileNav';
+import DashboardLayout from '@/components/DashboardLayout';
 
 interface OverduePlant {
     id: string;
@@ -62,188 +61,203 @@ export default function IrrigationPage() {
         }
     };
 
+    const criticalCount = overduePlants.filter(p => p.severity === 'critical').length;
+    const overdueCount = overduePlants.filter(p => p.severity === 'overdue').length;
+
+    const headerActions = (
+        <button
+            onClick={() => setShowScheduleForm(true)}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all font-medium shadow-lg shadow-blue-500/20 btn-press"
+        >
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Schedule</span>
+        </button>
+    );
+
     if (loading) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-slate-50">
-                <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span className="text-lg font-medium text-slate-700">Loading irrigation schedule...</span>
+            <DashboardLayout title="Irrigation" subtitle="Water your plants on time" headerActions={headerActions}>
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-white rounded-xl border border-slate-200 p-4 animate-pulse">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-slate-200 rounded-lg"></div>
+                                <div className="flex-1">
+                                    <div className="h-4 bg-slate-200 rounded w-1/2 mb-2"></div>
+                                    <div className="h-6 bg-slate-100 rounded w-1/3"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-            </div>
+                <div className="space-y-4">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="bg-white rounded-2xl border border-slate-200 p-6 animate-pulse">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-slate-200 rounded-xl"></div>
+                                <div className="flex-1">
+                                    <div className="h-5 bg-slate-200 rounded w-1/3 mb-2"></div>
+                                    <div className="h-4 bg-slate-100 rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </DashboardLayout>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 pb-20 md:pb-0">
-            {/* Header */}
-            <div className="bg-white border-b border-slate-200 shadow-sm sticky top-0 z-40">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg sm:rounded-xl flex items-center justify-center">
-                                <Droplets className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-lg sm:text-3xl font-bold text-slate-900">Irrigation</h1>
-                                <p className="text-slate-600 text-xs sm:text-base hidden sm:block">Water your plants on time</p>
-                            </div>
+        <DashboardLayout title="Irrigation" subtitle="Water your plants on time" headerActions={headerActions}>
+            {/* Stats Bar */}
+            <div className="grid grid-cols-3 gap-4 mb-8 animate-fadeIn">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 card-hover">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                            <Clock className="w-6 h-6 text-amber-600" />
                         </div>
-                        <div className="flex items-center gap-2 sm:gap-3">
-                            <button
-                                onClick={() => setShowScheduleForm(true)}
-                                className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-lg sm:rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all font-medium shadow-sm text-xs sm:text-sm"
-                            >
-                                <Plus className="w-4 h-4" />
-                                <span className="hidden sm:inline">Schedule</span>
-                            </button>
-                            <Link href="/" className="flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg sm:rounded-xl transition-colors text-xs sm:text-sm">
-                                <ArrowLeft className="w-4 h-4" />
-                                <span className="hidden sm:inline">Dashboard</span>
-                            </Link>
+                        <div>
+                            <p className="text-sm text-slate-500 font-medium">Overdue</p>
+                            <p className="text-2xl font-bold text-slate-900">{overdueCount}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 card-hover">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-rose-100 rounded-xl flex items-center justify-center">
+                            <AlertTriangle className="w-6 h-6 text-rose-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-slate-500 font-medium">Critical</p>
+                            <p className="text-2xl font-bold text-slate-900">{criticalCount}</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 card-hover">
+                    <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <Droplets className="w-6 h-6 text-blue-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-slate-500 font-medium">Total Pending</p>
+                            <p className="text-2xl font-bold text-slate-900">{overduePlants.length}</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-                {/* Stats Bar */}
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6 sm:mb-8">
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                                <AlertTriangle className="w-5 h-5 text-amber-600" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-600">Overdue</p>
-                                <p className="text-2xl font-bold text-slate-900">
-                                    {overduePlants.filter(p => p.severity === 'overdue').length}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center">
-                                <AlertTriangle className="w-5 h-5 text-rose-600" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-600">Critical</p>
-                                <p className="text-2xl font-bold text-slate-900">
-                                    {overduePlants.filter(p => p.severity === 'critical').length}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                                <Droplets className="w-5 h-5 text-blue-600" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-slate-600">Total Needing Water</p>
-                                <p className="text-2xl font-bold text-slate-900">{overduePlants.length}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {overduePlants.length > 0 ? (
-                    <div className="space-y-4">
-                        {overduePlants.map((plant) => (
-                            <div
-                                key={plant.id}
-                                className={`bg-white rounded-2xl shadow-sm border-l-4 p-6 ${plant.severity === 'critical'
-                                    ? 'border-rose-500'
-                                    : 'border-amber-500'
-                                    }`}
-                            >
-                                <div className="flex items-start justify-between gap-4">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${plant.severity === 'critical'
-                                                ? 'bg-rose-100'
-                                                : 'bg-amber-100'
-                                                }`}>
-                                                <AlertTriangle className={`w-5 h-5 ${plant.severity === 'critical'
-                                                    ? 'text-rose-600'
-                                                    : 'text-amber-600'
-                                                    }`} />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-xl font-bold text-slate-900">{plant.batch_name}</h3>
-                                                <p className="text-sm text-slate-600">{plant.plant_types.name}</p>
-                                            </div>
-                                            <span className={`px-3 py-1.5 rounded-xl text-xs font-bold ${plant.severity === 'critical'
-                                                ? 'bg-rose-100 text-rose-700'
-                                                : 'bg-amber-100 text-amber-700'
-                                                }`}>
+            {overduePlants.length > 0 ? (
+                <div className="space-y-4">
+                    {overduePlants.map((plant, index) => (
+                        <div
+                            key={plant.id}
+                            className={`
+                                bg-white rounded-2xl shadow-sm border-l-4 p-5 lg:p-6 card-hover animate-fadeIn
+                                ${plant.severity === 'critical' ? 'border-rose-500' : 'border-amber-500'}
+                            `}
+                            style={{ animationDelay: `${index * 0.05}s` }}
+                        >
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div className="flex items-start gap-4">
+                                    <div className={`
+                                        w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0
+                                        ${plant.severity === 'critical'
+                                            ? 'bg-gradient-to-br from-rose-500 to-pink-600 shadow-lg shadow-rose-500/20'
+                                            : 'bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg shadow-amber-500/20'
+                                        }
+                                    `}>
+                                        <Droplets className="w-6 h-6 text-white" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-3 flex-wrap mb-2">
+                                            <h3 className="text-lg font-bold text-slate-900">{plant.batch_name}</h3>
+                                            <span className={`
+                                                px-3 py-1 rounded-full text-xs font-bold
+                                                ${plant.severity === 'critical'
+                                                    ? 'bg-rose-100 text-rose-700'
+                                                    : 'bg-amber-100 text-amber-700'
+                                                }
+                                            `}>
                                                 {plant.severity === 'critical' ? '🚨 CRITICAL' : '⚠️ OVERDUE'}
                                             </span>
                                         </div>
+                                        <p className="text-sm text-slate-500 mb-3">{plant.plant_types.name}</p>
 
-                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                                            <div className="p-3 bg-slate-50 rounded-xl">
-                                                <p className="text-xs text-slate-600 mb-1">Field</p>
-                                                <p className="font-semibold text-slate-900 text-sm">{plant.fields.name}</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            <div className="px-3 py-1.5 bg-slate-100 rounded-lg text-xs">
+                                                <span className="text-slate-500">Field:</span>
+                                                <span className="font-semibold text-slate-700 ml-1">{plant.fields.name}</span>
                                             </div>
-                                            <div className="p-3 bg-rose-50 rounded-xl">
-                                                <p className="text-xs text-slate-600 mb-1">Days Overdue</p>
-                                                <p className="font-bold text-rose-600 text-sm">{plant.days_overdue} days</p>
+                                            <div className={`px-3 py-1.5 rounded-lg text-xs ${plant.severity === 'critical' ? 'bg-rose-100' : 'bg-amber-100'
+                                                }`}>
+                                                <span className="text-slate-500">Overdue:</span>
+                                                <span className={`font-bold ml-1 ${plant.severity === 'critical' ? 'text-rose-700' : 'text-amber-700'
+                                                    }`}>
+                                                    {plant.days_overdue} days
+                                                </span>
                                             </div>
-                                            <div className="p-3 bg-slate-50 rounded-xl">
-                                                <p className="text-xs text-slate-600 mb-1">Frequency</p>
-                                                <p className="font-semibold text-slate-900 text-sm">Every {plant.plant_types.irrigation_frequency_days}d</p>
+                                            <div className="px-3 py-1.5 bg-slate-100 rounded-lg text-xs">
+                                                <span className="text-slate-500">Frequency:</span>
+                                                <span className="font-semibold text-slate-700 ml-1">Every {plant.plant_types.irrigation_frequency_days}d</span>
                                             </div>
-                                            <div className="p-3 bg-slate-50 rounded-xl">
-                                                <p className="text-xs text-slate-600 mb-1">Last Watered</p>
-                                                <p className="font-semibold text-slate-900 text-sm">
+                                            <div className="px-3 py-1.5 bg-slate-100 rounded-lg text-xs flex items-center gap-1">
+                                                <CalendarIcon className="w-3 h-3 text-slate-400" />
+                                                <span className="text-slate-500">Last:</span>
+                                                <span className="font-semibold text-slate-700">
                                                     {plant.last_irrigation_date
                                                         ? new Date(plant.last_irrigation_date).toLocaleDateString()
                                                         : 'Never'}
-                                                </p>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <button
-                                        onClick={() => handleMarkAsWatered(plant.id)}
-                                        disabled={wateringPlant === plant.id}
-                                        className="px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all font-medium shadow-sm whitespace-nowrap flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {wateringPlant === plant.id ? (
-                                            <>
-                                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                                Watering...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Droplets className="w-4 h-4" />
-                                                Mark as Watered
-                                            </>
-                                        )}
-                                    </button>
                                 </div>
+
+                                <button
+                                    onClick={() => handleMarkAsWatered(plant.id)}
+                                    disabled={wateringPlant === plant.id}
+                                    className={`
+                                        flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium
+                                        transition-all shadow-lg btn-press whitespace-nowrap
+                                        ${wateringPlant === plant.id
+                                            ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white hover:from-blue-600 hover:to-cyan-700 shadow-blue-500/20'
+                                        }
+                                    `}
+                                >
+                                    {wateringPlant === plant.id ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                                            Watering...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Droplets className="w-5 h-5" />
+                                            Mark as Watered
+                                        </>
+                                    )}
+                                </button>
                             </div>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-16 text-center">
-                        <div className="w-20 h-20 bg-emerald-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <CheckCircle2 className="w-10 h-10 text-emerald-600" />
                         </div>
-                        <h2 className="text-2xl font-bold text-slate-900 mb-2">All Caught Up!</h2>
-                        <p className="text-slate-600 mb-1">No plants need irrigation at this time</p>
-                        <p className="text-sm text-slate-500 mb-6">Your irrigation schedule is up to date</p>
-                        <button
-                            onClick={() => setShowScheduleForm(true)}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all font-medium"
-                        >
-                            <Plus className="w-4 h-4" />
-                            Schedule Future Irrigation
-                        </button>
+                    ))}
+                </div>
+            ) : (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 lg:p-16 text-center animate-fadeIn">
+                    <div className="w-24 h-24 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/10">
+                        <CheckCircle2 className="w-12 h-12 text-emerald-600" />
                     </div>
-                )}
-            </div>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2">All Caught Up!</h2>
+                    <p className="text-slate-500 mb-1">No plants need irrigation at this time</p>
+                    <p className="text-sm text-slate-400 mb-8">Your irrigation schedule is up to date</p>
+                    <button
+                        onClick={() => setShowScheduleForm(true)}
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-600 text-white rounded-xl hover:from-blue-600 hover:to-cyan-700 transition-all font-medium shadow-lg shadow-blue-500/20"
+                    >
+                        <Plus className="w-5 h-5" />
+                        Schedule Future Irrigation
+                    </button>
+                </div>
+            )}
 
             {/* Schedule Irrigation Modal */}
             <ScheduleIrrigationForm
@@ -251,9 +265,6 @@ export default function IrrigationPage() {
                 onClose={() => setShowScheduleForm(false)}
                 onSuccess={fetchOverdue}
             />
-
-            {/* Mobile Bottom Navigation */}
-            <MobileNav />
-        </div>
+        </DashboardLayout>
     );
 }
