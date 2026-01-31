@@ -102,7 +102,7 @@ export default function Sidebar({ alerts = 0 }: SidebarProps) {
             {/* Logo Section */}
             <div className={`p-4 border-b border-slate-200/60 ${isCollapsed ? 'px-3' : 'px-5'}`}>
                 <Link href="/" className="flex items-center gap-3 group">
-                    <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/40 transition-shadow">
                         <Leaf className="w-5 h-5 text-white" />
                     </div>
                     {!isCollapsed && (
